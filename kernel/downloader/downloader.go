@@ -6,4 +6,5 @@ import (
 
 type Downloader interface {
 	Do(task *taskpool.Task) error
+	Copy() Downloader
 }

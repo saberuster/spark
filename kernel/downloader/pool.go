@@ -2,13 +2,12 @@ package downloader
 
 import (
 	"sync"
-	"net/http"
 	"fmt"
 )
 
 type PoolInterface interface {
-	Get() (d Downloader, err error)
-	Free(d Downloader)
+	Get() (Downloader, error)
+	Free(Downloader)
 }
 
 type Pool struct {
@@ -36,12 +35,11 @@ func (p *Pool) Free(d Downloader) {
 	return
 }
 
-func NewPool() *Pool {
-	client := &http.Client{}
-	dls := make([]Downloader, 0, 10)
-	c := make(chan bool, 10)
-	for n := 0; n < 10; n++ {
-		dls = append(dls, NewDownloader(client))
+func NewPool(dl Downloader, cc int) *Pool {
+	dls := make([]Downloader, cc)
+	c := make(chan bool, cc)
+	for n := 0; n < cc; n++ {
+		dls = append(dls, dl.Copy())
 		c <- true
 	}
 

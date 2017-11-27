@@ -14,6 +14,12 @@ func (od *OriginDownloader) Do(t *taskpool.Task) (err error) {
 	return
 }
 
+func (od *OriginDownloader) Copy() Downloader {
+	return &OriginDownloader{
+		client: od.client,
+	}
+}
+
 func NewDownloader(c *http.Client) Downloader {
 	return &OriginDownloader{
 		client: c,

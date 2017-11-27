@@ -7,9 +7,19 @@ import (
 	"github.com/saberuster/spark/kernel/pipeline"
 	"github.com/saberuster/spark/kernel/spider"
 	"fmt"
+	debug2 "github.com/saberuster/spark/common/debug"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var defaultConcurrent = 100
+
+var (
+	quit     chan bool
+	relaunch bool
+	debug    debug2.Debug
+)
 
 type Kernel struct {
 	dlPool    downloader.PoolInterface //下载器
@@ -18,15 +28,18 @@ type Kernel struct {
 }
 
 func (k *Kernel) Run() {
+	quit = make(chan bool)
+	debug = true
+
+	go signalHandler()
+
 	wg := sync.WaitGroup{}
 	for {
 		t, ok := k.taskPool.Get()
 		if !ok {
 			break
 		}
-		fmt.Println("获取到任务")
 		dl, err := k.dlPool.Get()
-		fmt.Println("获取到下载器")
 		if err != nil {
 			fmt.Println(err)
 			panic(nil)
@@ -59,3 +72,27 @@ func New(dlPool downloader.PoolInterface, taskPool taskpool.Interface, pipelines
 		pipelines: pipelines,
 	}
 }
+
+func signalHandler() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGUSR1)
+	for sig := range c {
+		if sig == syscall.SIGUSR1 {
+			relaunch = true
+		}
+
+		close(quit)
+		break
+	}
+}
+
+//func lookPath() (argv0 string, err error) {
+//	argv0, err = exec.LookPath(os.Args[0])
+//	if nil != err {
+//		return
+//	}
+//	if _, err = os.Stat(argv0); nil != err {
+//		return
+//	}
+//	return
+//}
