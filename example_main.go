@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/saberuster/spark/kernel/taskpool"
 	"net/http"
+	"fmt"
+
+	"github.com/saberuster/spark/kernel/taskpool"
 	"github.com/saberuster/spark/kernel"
 	"github.com/saberuster/spark/kernel/downloader"
 	"github.com/saberuster/spark/kernel/pipeline"
-	"fmt"
 	"github.com/saberuster/spark/kernel/spider"
 )
 

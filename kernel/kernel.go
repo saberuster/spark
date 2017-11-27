@@ -31,7 +31,7 @@ func (k *Kernel) Run() {
 	quit = make(chan bool)
 	debug = true
 
-	go signalHandler()
+	//go signalHandler()
 
 	wg := sync.WaitGroup{}
 	for {
@@ -45,21 +45,24 @@ func (k *Kernel) Run() {
 			panic(nil)
 		}
 		wg.Add(1)
-		go func(dl downloader.Downloader) {
-			defer func() {
-				k.dlPool.Free(dl)
-				wg.Done()
-			}()
+		go func() {
 			err := dl.Do(t)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
+
 			sp := &spider.Spider{Task: t, Result: t.Response}
 			for _, pip := range k.pipelines {
-				pip.Write(sp)
+				err = pip.Write(sp)
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
 			}
-		}(dl)
+			k.dlPool.Free(dl)
+			wg.Done()
+		}()
 	}
 
 	wg.Wait()

@@ -2,7 +2,6 @@ package downloader
 
 import (
 	"sync"
-	"fmt"
 )
 
 type PoolInterface interface {
@@ -21,7 +20,6 @@ func (p *Pool) Get() (d Downloader, err error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	endPos := len(p.downloaders) - 1
-	fmt.Println(endPos)
 	d = p.downloaders[endPos]
 	p.downloaders = p.downloaders[0:endPos]
 	return
@@ -29,14 +27,17 @@ func (p *Pool) Get() (d Downloader, err error) {
 
 func (p *Pool) Free(d Downloader) {
 	p.mu.Lock()
-	p.downloaders = append(p.downloaders, d)
-	p.mu.Unlock()
+	defer p.mu.Unlock()
+	if len(p.count) == cap(p.count) {
+		return
+	}
 	p.count <- true
+	p.downloaders = append(p.downloaders, d)
 	return
 }
 
 func NewPool(dl Downloader, cc int) *Pool {
-	dls := make([]Downloader, cc)
+	dls := make([]Downloader, 0, cc)
 	c := make(chan bool, cc)
 	for n := 0; n < cc; n++ {
 		dls = append(dls, dl.Copy())

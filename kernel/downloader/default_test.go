@@ -4,7 +4,6 @@ import (
 	"testing"
 	"net/http"
 	"fmt"
-	"github.com/saberuster/spark/kernel/queue"
 	"github.com/saberuster/spark/kernel/taskpool"
 )
 

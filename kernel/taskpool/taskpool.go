@@ -22,9 +22,9 @@ func (tp *TaskPool) Get() (t *Task, ok bool) {
 	if tp.count == 0 {
 		return nil, false
 	}
-	t = tp.tasks[0]
+	t = tp.tasks[len(tp.tasks)-1]
 	ok = true
-	tp.tasks = tp.tasks[1:tp.count]
+	tp.tasks = tp.tasks[0:len(tp.tasks)-1]
 	tp.count--
 	return
 }
