@@ -1,35 +1,33 @@
 package log
 
-import (
-	"log"
-	"io"
-)
+import "fmt"
 
-type Logger struct {
-	log *log.Logger
-}
-
-func New(out io.Writer, prefix string, flag int) *Logger {
-	return &Logger{
-		log: log.New(out, prefix, flag),
+func (l *Logger) Info(format string, args ...interface{}) {
+	if l.level&LVINFO == 1 {
+		l.log.Println(fmt.Sprintf(format, args...))
 	}
 }
 
-func (l *Logger) Error(err error) {
-	l.log.Println(err)
+func (l *Logger) Debug(format string, args ...interface{}) {
+	if l.level&LVDEBUG == 1 {
+		l.log.Println(fmt.Sprintf(format, args...))
+	}
 }
 
-
-func (l *Logger) Info() {
-
+func (l *Logger) Warning(format string, args ...interface{}) {
+	if l.level&LVWARN == 1 {
+		l.log.Println(fmt.Sprintf(format, args...))
+	}
 }
 
-func (l *Logger) Warning() {
-
+func (l *Logger) Error(format string, args ...interface{}) {
+	if l.level&LVERROR == 1 {
+		l.log.Panicln(fmt.Sprintf(format, args...))
+	}
 }
 
-
-
-
-
-
+func (l *Logger) Fatal(format string, args ...interface{}) {
+	if l.level&LVFATAL == 1 {
+		l.log.Fatal(fmt.Sprintf(format, args...))
+	}
+}

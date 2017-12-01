@@ -1,24 +1,22 @@
 package kernel
 
 import (
-	"github.com/saberuster/spark/kernel/downloader"
-	"github.com/saberuster/spark/kernel/taskpool"
 	"sync"
-	"github.com/saberuster/spark/kernel/pipeline"
-	"github.com/saberuster/spark/kernel/spider"
 	"fmt"
-	debug2 "github.com/saberuster/spark/common/debug"
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/saberuster/spark/kernel/downloader"
+	"github.com/saberuster/spark/kernel/taskpool"
+	"github.com/saberuster/spark/kernel/pipeline"
+	"github.com/saberuster/spark/kernel/spider"
 )
 
 var defaultConcurrent = 100
 
 var (
-	quit     chan bool
+	quit     chan struct{} //使用struct{}可以最小化占用的内存
 	relaunch bool
-	debug    debug2.Debug
 )
 
 type Kernel struct {
@@ -28,10 +26,9 @@ type Kernel struct {
 }
 
 func (k *Kernel) Run() {
-	quit = make(chan bool)
-	debug = true
+	quit = make(chan struct{})
 
-	//go signalHandler()
+	go signalHandler()
 
 	wg := sync.WaitGroup{}
 	for {
@@ -89,13 +86,3 @@ func signalHandler() {
 	}
 }
 
-//func lookPath() (argv0 string, err error) {
-//	argv0, err = exec.LookPath(os.Args[0])
-//	if nil != err {
-//		return
-//	}
-//	if _, err = os.Stat(argv0); nil != err {
-//		return
-//	}
-//	return
-//}
